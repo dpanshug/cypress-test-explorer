@@ -16,6 +16,10 @@
   "contributes": {
     "commands": [
       {
+        "command": "extension.handleButtonClick",
+        "title": "Handle Button Click"
+    },
+      {
         "command": "extension.startCypressServer",
         "title": "Start Cypress Server"
       }

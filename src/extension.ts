@@ -10,16 +10,10 @@ const cypressRun = `cd ${odhDashboardDirectory} && npm i && npm run cypress:serv
 const cypressExecute = `cd ${odhDashboardDirectory} && npm i && npm run cypress:open:mock`;
 
 let myStatusBarItem: vscode.StatusBarItem;
-let isStarted = false;
+let isStarted = false;import { createStatusBarButton } from './StatusBarButton';
+
 export function activate(context: vscode.ExtensionContext) {
-  myStatusBarItem = vscode.window.createStatusBarItem(
-    vscode.StatusBarAlignment.Right,
-    100
-  );
-  myStatusBarItem.text = "Cypress Server";
-  myStatusBarItem.tooltip = "Start/Stop the Cypress Server";
-  myStatusBarItem.command = "extension.startCypressServer";
-  myStatusBarItem.show();
+    createStatusBarButton(context)
 
   let disposable = vscode.commands.registerCommand(
     "extension.startCypressServer",
