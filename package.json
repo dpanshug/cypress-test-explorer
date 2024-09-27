@@ -9,15 +9,17 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [],
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "main": "./dist/extension.js",
   "contributes": {
     "commands": [
       {
-          "command": "extension.startCypressServer",
-          "title": "Start Cypress Server"
+        "command": "extension.startCypressServer",
+        "title": "Start Cypress Server"
       }
-  ]
+    ]
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
