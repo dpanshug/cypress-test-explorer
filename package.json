@@ -16,14 +16,40 @@
   "contributes": {
     "commands": [
       {
+        "command": "extension.helloWorld",
+        "category": "Cypress",
+        "title": "Hello World"
+      },
+      {
         "command": "extension.handleButtonClick",
+        "category": "Cypress",
         "title": "Handle Button Click"
-    },
+      },
       {
         "command": "extension.startCypressServer",
+        "category": "Cypress",
         "title": "Start Cypress Server"
       }
-    ]
+    ],
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "cypress-test-explorer-sidebar-view",
+          "title": "Cypress Test Explorer",
+          "icon": "media/beaker.svg"
+        }
+      ]
+    },
+    "views": {
+      "cypress-test-explorer-sidebar-view": [
+        {
+          "type": "webview",
+          "id": "cypressFileExplorer",
+          "name": "Cypress Test Explorer",
+          "icon": "media/beaker.svg"
+        }
+      ]
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run package",
