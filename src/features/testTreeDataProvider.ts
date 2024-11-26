@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
 
-class TestFile extends vscode.TreeItem {
+export class TestFile extends vscode.TreeItem {
   constructor(
     public readonly label: string,
     public readonly collapsibleState: vscode.TreeItemCollapsibleState,
@@ -14,6 +14,15 @@ class TestFile extends vscode.TreeItem {
       vscode.workspace.workspaceFolders![0].uri.fsPath,
       this.resourceUri.fsPath,
     );
+
+    if (this.collapsibleState === vscode.TreeItemCollapsibleState.None) {
+      this.command = {
+        command: 'vscode.open',
+        title: 'Open File',
+        arguments: [this.resourceUri],
+      };
+      this.contextValue = 'cypressTest';
+    }
   }
 }
 
@@ -39,10 +48,17 @@ export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
       return Promise.resolve([]);
     }
 
+    const startingFolder = vscode.workspace
+      .getConfiguration('cypressTestExplorer')
+      .get('startingFolder', '');
+    const rootDir = startingFolder
+      ? path.join(this.workspaceRoot, startingFolder)
+      : this.workspaceRoot;
+
     if (element) {
       return this.getTestFiles(element.resourceUri.fsPath);
     } else {
-      return this.getTestFiles(this.workspaceRoot);
+      return this.getTestFiles(rootDir);
     }
   }
 
@@ -65,13 +81,7 @@ export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
           }
           return null;
         } else if (entry.name.endsWith('.cy.ts')) {
-          const treeItem = new TestFile(entry.name, vscode.TreeItemCollapsibleState.None, uri);
-          treeItem.command = {
-            command: 'vscode.open',
-            title: 'Open File',
-            arguments: [uri],
-          };
-          return treeItem;
+          return new TestFile(entry.name, vscode.TreeItemCollapsibleState.None, uri);
         }
         return null;
       }),

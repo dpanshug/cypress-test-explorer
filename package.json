@@ -36,6 +36,21 @@
         "command": "cypressTestExplorer.refresh",
         "title": "Refresh Cypress Tests",
         "icon": "$(refresh)"
+      },
+      {
+        "command": "cypressTestExplorer.setStartingFolder",
+        "title": "Set Cypress Root Folder",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "cypressTestExplorer.runTest",
+        "title": "Run Cypress Test",
+        "icon": "$(play)"
+      },
+      {
+        "command": "cypressTestExplorer.runAllTests",
+        "title": "Run All Cypress Tests",
+        "icon": "$(run-all)"
       }
     ],
     "menus": {
@@ -44,8 +59,40 @@
           "command": "cypressTestExplorer.refresh",
           "when": "view == cypressTestExplorer",
           "group": "navigation"
+        },
+        {
+          "command": "cypressTestExplorer.setStartingFolder",
+          "when": "view == cypressTestExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "cypressTestExplorer.runAllTests",
+          "when": "view == cypressTestExplorer",
+          "group": "navigation"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "cypressTestExplorer.runTest",
+          "when": "view == cypressTestExplorer && viewItem == cypressTest",
+          "group": "inline"
         }
       ]
+    },
+    "configuration": {
+      "title": "Cypress Test Explorer",
+      "properties": {
+        "cypressTestExplorer.startingFolder": {
+          "type": "string",
+          "default": "",
+          "description": "Specify the starting folder for Cypress tests (relative to workspace root)"
+        },
+        "cypressTestExplorer.cypressExecutable": {
+          "type": "string",
+          "default": "npx cypress",
+          "description": "Specify the Cypress executable command (e.g., 'npx cypress' or path to Cypress binary)"
+        }
+      }
     }
   },
   "scripts": {
