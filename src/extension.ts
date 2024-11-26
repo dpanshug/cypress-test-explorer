@@ -8,4 +8,6 @@ export function activate(context: vscode.ExtensionContext) {
   context.subscriptions.push(testExplorer);
 }
 
-export function deactivate() {}
+export function deactivate() {
+  console.log('Cypress Test Explorer is now deactivated!');
+}
