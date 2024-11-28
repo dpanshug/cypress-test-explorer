@@ -46,6 +46,14 @@ This extension contributes the following settings:
 - `cypressTestExplorer.startingFolder`: Specify the starting folder for Cypress tests (relative to workspace root)
 - `cypressTestExplorer.cypressExecutable`: Specify the Cypress executable command (default: "npx cypress")
 
+## Development
+
+[VSC Extension quickstart](vsc-extension-quickstart.md) will provide a guide for developers getting started with creating and debugging VS Code extensions. If you're new to VS Code extension development, you can refer to this file for detailed instructions on:
+
+- Setting up your development environment.
+- Running the extension in a development instance of VS Code.
+- Debugging and testing the extension.
+
 ## Known Issues
 
 Please report issues on the [GitHub repository](https://github.com/yourusername/cypress-test-explorer/issues).
