@@ -9,7 +9,7 @@ A Visual Studio Code extension that helps you discover, navigate and run Cypress
 - ⚡ Quick access to run individual tests or all tests
 - 🔄 Easy refresh to update the test list
 - ⚙️ Configurable root folder for test discovery
-- 🗂️ Configure project path for config discovery
+- 🗂️ Configure project path for locating cypress config file
 - 🔧 Configure environment variables tailored to each project
 
 ## Usage
@@ -19,17 +19,36 @@ A Visual Studio Code extension that helps you discover, navigate and run Cypress
 1. Click the Cypress Test Explorer icon in the Activity Bar
 2. Your Cypress tests will be automatically discovered and displayed in a tree view
 
+### Run Tests
+
+- Click the play button next to any test to run it
+- When multiple tests are run simultaneously, they are executed in a queue
+- Use the "Run All Tests" button in the title bar to run all tests
+
 ### Configure Root Folder
 
 1. Click the folder icon in the Test Explorer title bar
 2. Enter the relative path to your Cypress tests folder
 3. The test tree will automatically refresh with tests from the specified folder
 
-### Run Tests
+### Configure Project Folder
 
-- Click the play button next to any test to run it
-- Use the "Run All Tests" button in the title bar to run all tests
-- Tests can also be run from the context menu
+1. Click the folder icon (Set Cypress Project Path) in the Test Explorer title bar.
+2. Enter the relative path to the folder containing the Cypress configuration file.
+
+### Configure Environment Variables
+
+1. In the Activity Bar, below the list of Cypress files, locate the section for Environment Variables.
+2. Enter the environment variables, such as `CY_MOCK=1`, to be used for executing the Cypress run.
+3. Click Save to apply the changes.
+
+### Configure executable command
+
+Set the command to run Cypress tests.
+
+1. Open the Command Palette by pressing Command + Shift + P (Mac) or Ctrl + Shift + P (Windows/Linux).
+2. Type "Set Executable Cypress Command" and select it from the options.
+3. Enter the command to run tests, e.g., npx cypress.
 
 ### Refresh Test List
 
@@ -40,13 +59,6 @@ Click the refresh button in the Test Explorer title bar to update the list of te
 - Visual Studio Code v1.60.0 or higher
 - Node.js and npm installed
 - Cypress installed in your project
-
-## Extension Settings
-
-This extension contributes the following settings:
-
-- `cypressTestExplorer.startingFolder`: Specify the starting folder for Cypress tests (relative to workspace root)
-- `cypressTestExplorer.cypressExecutable`: Specify the Cypress executable command (default: "npx cypress")
 
 ## Development
 

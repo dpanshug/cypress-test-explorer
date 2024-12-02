@@ -41,7 +41,7 @@ export class TestExplorer {
       ),
       vscode.commands.registerCommand('cypressTestExplorer.runTest', (test) => this.runTest(test)),
       vscode.commands.registerCommand('cypressTestExplorer.runAllTests', () => this.runAllTests()),
-      vscode.commands.registerCommand('cypressTestExplorer.cypressExecutable', () =>
+      vscode.commands.registerCommand('cypressTestExplorer.setCypressExecutable', () =>
         this.setCypressExecutable(),
       ),
     );

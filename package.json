@@ -72,7 +72,7 @@
         "title": "Update Cypress Environment Variables"
       },
       {
-        "command": "cypressTestExplorer.cypressExecutable",
+        "command": "cypressTestExplorer.setCypressExecutable",
         "title": "Set Cypress Executable command"
       }
     ],
