@@ -9,11 +9,7 @@ export class TestFile extends vscode.TreeItem {
     public readonly resourceUri: vscode.Uri,
   ) {
     super(label, collapsibleState);
-    this.tooltip = this.label;
-    this.description = path.relative(
-      vscode.workspace.workspaceFolders![0].uri.fsPath,
-      this.resourceUri.fsPath,
-    );
+    this.tooltip = this.resourceUri.fsPath;
 
     if (this.collapsibleState === vscode.TreeItemCollapsibleState.None) {
       this.command = {
@@ -80,7 +76,7 @@ export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
             return new TestFile(entry.name, vscode.TreeItemCollapsibleState.Collapsed, uri);
           }
           return null;
-        } else if (entry.name.endsWith('.cy.ts')) {
+        } else if (entry.name.endsWith('.cy.ts') || entry.name.endsWith('.cy.js')) {
           return new TestFile(entry.name, vscode.TreeItemCollapsibleState.None, uri);
         }
         return null;

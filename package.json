@@ -33,6 +33,11 @@
         {
           "id": "cypressTestExplorer",
           "name": "Test Explorer"
+        },
+        {
+          "id": "cypressEnvironmentVariables",
+          "name": "Environment Variables",
+          "type": "webview"
         }
       ]
     },
@@ -56,6 +61,19 @@
         "command": "cypressTestExplorer.runAllTests",
         "title": "Run All Cypress Tests",
         "icon": "$(run-all)"
+      },
+      {
+        "command": "cypressTestExplorer.setProjectPath",
+        "title": "Set Cypress Project Path",
+        "icon": "$(folder)"
+      },
+      {
+        "command": "cypressTestExplorer.updateEnvironmentVariables",
+        "title": "Update Cypress Environment Variables"
+      },
+      {
+        "command": "cypressTestExplorer.setCypressExecutable",
+        "title": "Set Cypress Executable command"
       }
     ],
     "menus": {
@@ -72,6 +90,11 @@
         },
         {
           "command": "cypressTestExplorer.runAllTests",
+          "when": "view == cypressTestExplorer",
+          "group": "navigation"
+        },
+        {
+          "command": "cypressTestExplorer.setProjectPath",
           "when": "view == cypressTestExplorer",
           "group": "navigation"
         }
@@ -96,6 +119,21 @@
           "type": "string",
           "default": "npx cypress",
           "description": "Specify the Cypress executable command (e.g., 'npx cypress' or path to Cypress binary)"
+        },
+        "cypressTestExplorer.configFilePath": {
+          "type": "string",
+          "default": "",
+          "description": "Relative path to the Cypress configuration file (e.g., 'frontend/src/__tests__/cypress/cypress.config.ts')"
+        },
+        "cypressTestExplorer.projectPath": {
+          "type": "string",
+          "default": "",
+          "description": "Relative path to the Cypress project directory (e.g., 'frontend/src/__tests__/cypress')"
+        },
+        "cypressTestExplorer.environmentVariables": {
+          "type": "object",
+          "default": {},
+          "description": "Environment variables to be set when running Cypress tests"
         }
       }
     }
