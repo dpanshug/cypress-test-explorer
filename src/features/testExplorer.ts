@@ -41,6 +41,9 @@ export class TestExplorer {
       ),
       vscode.commands.registerCommand('cypressTestExplorer.runTest', (test) => this.runTest(test)),
       vscode.commands.registerCommand('cypressTestExplorer.runAllTests', () => this.runAllTests()),
+      vscode.commands.registerCommand('cypressTestExplorer.cypressExecutable', () =>
+        this.setCypressExecutable(),
+      ),
     );
   }
 
@@ -177,6 +180,35 @@ export class TestExplorer {
       .join(' ');
 
     return `${envString} ${cypressExecutable} run ${projectOption} ${specOption}`.trim();
+  }
+
+  public async setCypressExecutable() {
+    const currentCommand = vscode.workspace
+      .getConfiguration('cypressTestExplorer')
+      .get('cypressExecutable', '');
+
+    const executableCommand = await vscode.window.showInputBox({
+      prompt:
+        'Specify the Cypress executable command (e.g., "npx cypress" or path to Cypress binary)',
+      placeHolder: 'npx cypress',
+      value: currentCommand,
+      validateInput: (value) => {
+        if (!value || (value && !path.isAbsolute(value))) {
+          return null; // input is valid
+        }
+        return 'Please enter a relative path';
+      },
+    });
+
+    if (executableCommand !== undefined) {
+      await vscode.workspace
+        .getConfiguration('cypressTestExplorer')
+        .update('cypressExecutable', executableCommand, true);
+      vscode.window.showInformationMessage(
+        `Cypress executable command set to: ${executableCommand}`,
+      );
+      this.refresh();
+    }
   }
 
   private async runTest(test: TestFile) {

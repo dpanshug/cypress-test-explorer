@@ -70,6 +70,10 @@
       {
         "command": "cypressTestExplorer.updateEnvironmentVariables",
         "title": "Update Cypress Environment Variables"
+      },
+      {
+        "command": "cypressTestExplorer.cypressExecutable",
+        "title": "Set Cypress Executable command"
       }
     ],
     "menus": {
