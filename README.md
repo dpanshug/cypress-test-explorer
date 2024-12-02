@@ -4,11 +4,13 @@ A Visual Studio Code extension that helps you discover, navigate and run Cypress
 
 ## Features
 
-- 🔍 Automatically discovers all `.cy.ts` files in your workspace
+- 🔍 Automatically discovers all the cypress files in your workspace
 - 📁 Displays tests in a tree view organized by directory structure
 - ⚡ Quick access to run individual tests or all tests
 - 🔄 Easy refresh to update the test list
 - ⚙️ Configurable root folder for test discovery
+- 🗂️ Configure project path for config discovery
+- 🔧 Configure environment variables tailored to each project
 
 ## Usage
 
@@ -56,7 +58,7 @@ This extension contributes the following settings:
 
 ## Known Issues
 
-Please report issues on the [GitHub repository](https://github.com/yourusername/cypress-test-explorer/issues).
+Please report issues on the [GitHub repository](https://github.com/dpanshug/cypress-test-explorer/issues).
 
 ## Contributing
 
