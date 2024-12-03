@@ -8,6 +8,7 @@
   },
   "description": "The ultimate tool for managing and running your Cypress tests directly within Visual Studio Code.",
   "version": "1.0.0",
+  "icon": "images/icon.png",
   "engines": {
     "vscode": "^1.92.0"
   },
