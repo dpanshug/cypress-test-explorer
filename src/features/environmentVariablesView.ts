@@ -16,6 +16,19 @@ export class EnvironmentVariablesView {
     webviewView.webview.html = this._getHtmlForWebview(webviewView.webview);
 
     this._setWebviewMessageListener(webviewView.webview);
+
+    // Update the webview content when it becomes visible
+    webviewView.onDidChangeVisibility(() => {
+      if (webviewView.visible) {
+        const currentEnv = vscode.workspace
+          .getConfiguration('cypressTestExplorer')
+          .get('environmentVariables', {});
+        const envString = Object.entries(currentEnv)
+          .map(([key, value]) => `${key}=${value}`)
+          .join('\n');
+        webviewView.webview.postMessage({ command: 'update', envVars: envString });
+      }
+    });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview) {
@@ -27,32 +40,52 @@ export class EnvironmentVariablesView {
       .join('\n');
 
     return `
-            <!DOCTYPE html>
-            <html lang="en">
-            <head>
-                <meta charset="UTF-8">
-                <meta name="viewport" content="width=device-width, initial-scale=1.0">
-                <title>Cypress Environment Variables</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 10px; }
-                    textarea { width: 100%; height: 200px; margin-bottom: 10px; }
-                    button { background-color: #007acc; color: white; border: none; padding: 8px 12px; cursor: pointer; }
-                </style>
-            </head>
-            <body>
-                <p>Set the enviroment variables</p>
-                <textarea id="envVars" placeholder="KEY1=VALUE1&#10;KEY2=VALUE2">${envString}</textarea>
-                <button id="saveButton">Save</button>
-                <script>
-                    const vscode = acquireVsCodeApi();
-                    document.getElementById('saveButton').addEventListener('click', () => {
-                        const envVars = document.getElementById('envVars').value;
-                        vscode.postMessage({ command: 'save', envVars: envVars });
-                    });
-                </script>
-            </body>
-            </html>
-        `;
+      <!DOCTYPE html>
+      <html lang="en">
+      <head>
+          <meta charset="UTF-8">
+          <meta name="viewport" content="width=device-width, initial-scale=1.0">
+          <title>Cypress Environment Variables</title>
+          <style>
+              body { font-family: Arial, sans-serif; padding: 10px; }
+              textarea { width: 100%; height: 200px; margin-bottom: 10px; }
+              button { background-color: #007acc; color: white; border: none; padding: 8px 12px; cursor: pointer; }
+          </style>
+      </head>
+      <body>
+          <p>Set the environment variables</p>
+          <textarea id="envVars" placeholder="KEY1=VALUE1&#10;KEY2=VALUE2">${envString}</textarea>
+          <button id="saveButton">Save</button>
+          <script>
+              const vscode = acquireVsCodeApi();
+              const textarea = document.getElementById('envVars');
+              const saveButton = document.getElementById('saveButton');
+  
+              // Load the current state
+              const currentState = vscode.getState() || { envVars: '' };
+              textarea.value = currentState.envVars;
+  
+              saveButton.addEventListener('click', () => {
+                  const envVars = textarea.value;
+                  vscode.postMessage({ command: 'save', envVars: envVars });
+                  // Update the saved state
+                  vscode.setState({ envVars: envVars });
+              });
+  
+              // Handle messages from the extension
+              window.addEventListener('message', event => {
+                  const message = event.data;
+                  switch (message.command) {
+                      case 'update':
+                          textarea.value = message.envVars;
+                          vscode.setState({ envVars: message.envVars });
+                          break;
+                  }
+              });
+          </script>
+      </body>
+      </html>
+    `;
   }
 
   private _setWebviewMessageListener(webview: vscode.Webview) {
