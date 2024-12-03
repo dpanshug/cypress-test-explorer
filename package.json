@@ -65,7 +65,7 @@
       {
         "command": "cypressTestExplorer.setProjectPath",
         "title": "Set Cypress Project Path",
-        "icon": "$(folder)"
+        "icon": "$(file-code)"
       },
       {
         "command": "cypressTestExplorer.updateEnvironmentVariables",
