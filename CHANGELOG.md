@@ -15,10 +15,8 @@ All notable changes to the "Cypress Test Explorer" extension will be documented 
 - Refresh functionality to update the test tree
 - Integration with VS Code's task system for running tests, allowing tests to be executed in a queue.
 
-### Changed
+## [1.0.1] - 2024-03-12
 
-- N/A (Initial release)
+### Added
 
-### Fixed
-
-- N/A (Initial release)
+- Added custom logo for the extension
