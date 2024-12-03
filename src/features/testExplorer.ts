@@ -163,8 +163,13 @@ export class TestExplorer {
         .getConfiguration('cypressTestExplorer')
         .update('environmentVariables', newEnv, true);
       vscode.window.showInformationMessage(`Environment variables updated`);
+      this.refreshEnvironmentVariablesView();
       this.refresh();
     }
+  }
+
+  private refreshEnvironmentVariablesView() {
+    vscode.commands.executeCommand('cypressTestExplorer.updateEnvironmentVariables');
   }
 
   private getCypressCommand(spec?: string): string {
