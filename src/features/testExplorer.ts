@@ -233,7 +233,7 @@ export class TestExplorer {
     const startingFolder = vscode.workspace
       .getConfiguration('cypressTestExplorer')
       .get('startingFolder', '');
-    const specPattern = startingFolder ? `"${startingFolder}/**/*.cy.{js,ts}"` : '';
+    const specPattern = startingFolder ? `'${startingFolder}/*.cy.{js,ts}'` : '';
     const command = this.getCypressCommand(specPattern);
 
     this.testQueue.push({ command, testName: 'All Tests' });
