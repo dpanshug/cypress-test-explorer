@@ -2,6 +2,18 @@
 
 All notable changes to the "Cypress Test Explorer" extension will be documented in this file.
 
+## [1.0.2] - 2024-04-12
+
+### Added
+
+- Now it supports VSCode version from v1.60.0 and above.
+
+## [1.0.1] - 2024-03-12
+
+### Added
+
+- Added custom logo for the extension
+
 ## [1.0.0] - 2024-03-12
 
 ### Added
@@ -14,9 +26,3 @@ All notable changes to the "Cypress Test Explorer" extension will be documented 
 - Support for both TypeScript (.cy.ts) and JavaScript (.cy.js) test files
 - Refresh functionality to update the test tree
 - Integration with VS Code's task system for running tests, allowing tests to be executed in a queue.
-
-## [1.0.1] - 2024-03-12
-
-### Added
-
-- Added custom logo for the extension
