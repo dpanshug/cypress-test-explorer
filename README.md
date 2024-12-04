@@ -56,7 +56,7 @@ Click the refresh button in the Test Explorer title bar to update the list of te
 
 ## Requirements
 
-- Visual Studio Code v1.92.0 or higher
+- Visual Studio Code v1.60.0 or higher
 - Node.js and npm installed
 - Cypress installed in your project
 

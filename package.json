@@ -7,10 +7,10 @@
     "url": "https://github.com/dpanshug/cypress-test-explorer"
   },
   "description": "The ultimate tool for managing and running your Cypress tests directly within Visual Studio Code.",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "icon": "images/icon.png",
   "engines": {
-    "vscode": "^1.92.0"
+    "vscode": "^1.60.0"
   },
   "categories": [
     "Testing"
@@ -154,7 +154,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
-    "@types/vscode": "^1.92.0",
+    "@types/vscode": "^1.60.0",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
