@@ -2,6 +2,12 @@
 
 All notable changes to the "Cypress Test Explorer" extension will be documented in this file.
 
+## [1.0.3] - 2024-04-12
+
+### Fixed
+
+- Bug inside run all
+
 ## [1.0.2] - 2024-04-12
 
 ### Added
