@@ -10,7 +10,7 @@ A Visual Studio Code extension that helps you discover, navigate and run Cypress
 - 🔄 Easy refresh to update the test list
 - ⚙️ Configurable root folder for test discovery
 - 🗂️ Configure project path for locating cypress config file
-- 🔧 Configure environment variables tailored to each project
+- 🔧 Configure cypress run variables tailored to each project
 
 ## Usage
 
@@ -36,10 +36,10 @@ A Visual Studio Code extension that helps you discover, navigate and run Cypress
 1. Click the folder icon (Set Cypress Project Path) in the Test Explorer title bar.
 2. Enter the relative path to the folder containing the Cypress configuration file.
 
-### Configure Environment Variables
+### Configure Cypress Run Variables
 
-1. In the Activity Bar, below the list of Cypress files, locate the section for Environment Variables.
-2. Enter the environment variables, such as `CY_MOCK=1`, to be used for executing the Cypress run.
+1. In the Activity Bar, below the list of Cypress files, locate the section for Cypress Run Variables.
+2. Enter the variables such as `CY_MOCK=1`, to be used for executing the Cypress run.
 3. Click Save to apply the changes.
 
 ### Configure executable command

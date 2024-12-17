@@ -36,8 +36,8 @@
           "name": "Test Explorer"
         },
         {
-          "id": "cypressEnvironmentVariables",
-          "name": "Environment Variables",
+          "id": "cypressRunVariables",
+          "name": "Cypress Run Variables",
           "type": "webview"
         }
       ]
@@ -69,8 +69,8 @@
         "icon": "$(file-code)"
       },
       {
-        "command": "cypressTestExplorer.updateEnvironmentVariables",
-        "title": "Update Cypress Environment Variables"
+        "command": "cypressTestExplorer.updateRunVariables",
+        "title": "Update Cypress Run Variables"
       },
       {
         "command": "cypressTestExplorer.setCypressExecutable",
@@ -131,10 +131,10 @@
           "default": "",
           "description": "Relative path to the Cypress project directory (e.g., 'frontend/src/__tests__/cypress')"
         },
-        "cypressTestExplorer.environmentVariables": {
+        "cypressTestExplorer.runVariables": {
           "type": "object",
           "default": {},
-          "description": "Environment variables to be set when running Cypress tests"
+          "description": "Run variables to be set when running Cypress tests"
         }
       }
     }
