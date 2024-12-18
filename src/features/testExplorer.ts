@@ -36,8 +36,8 @@ export class TestExplorer {
       vscode.commands.registerCommand('cypressTestExplorer.setProjectPath', () =>
         this.setProjectPath(),
       ),
-      vscode.commands.registerCommand('cypressTestExplorer.setEnvironmentVariables', () =>
-        this.setEnvironmentVariables(),
+      vscode.commands.registerCommand('cypressTestExplorer.setRunVariables', () =>
+        this.setRunVariables(),
       ),
       vscode.commands.registerCommand('cypressTestExplorer.runTest', (test) => this.runTest(test)),
       vscode.commands.registerCommand('cypressTestExplorer.runAllTests', () => this.runAllTests()),
@@ -138,12 +138,12 @@ export class TestExplorer {
     }
   }
 
-  public async setEnvironmentVariables() {
+  public async setRunVariables() {
     const currentEnv = vscode.workspace
       .getConfiguration('cypressTestExplorer')
-      .get('environmentVariables', {});
+      .get('runVariables', {});
     const envString = await vscode.window.showInputBox({
-      prompt: 'Enter environment variables as KEY1=VALUE1,KEY2=VALUE2',
+      prompt: 'Enter run variables as KEY1=VALUE1,KEY2=VALUE2',
       value: Object.entries(currentEnv)
         .map(([k, v]) => `${k}=${v}`)
         .join(','),
@@ -161,22 +161,22 @@ export class TestExplorer {
 
       await vscode.workspace
         .getConfiguration('cypressTestExplorer')
-        .update('environmentVariables', newEnv, true);
-      vscode.window.showInformationMessage(`Environment variables updated`);
-      this.refreshEnvironmentVariablesView();
+        .update('runVariables', newEnv, true);
+      vscode.window.showInformationMessage(`Run variables updated`);
+      this.refreshRunVariablesView();
       this.refresh();
     }
   }
 
-  private refreshEnvironmentVariablesView() {
-    vscode.commands.executeCommand('cypressTestExplorer.updateEnvironmentVariables');
+  private refreshRunVariablesView() {
+    vscode.commands.executeCommand('cypressTestExplorer.updateRunVariables');
   }
 
   private getCypressCommand(spec?: string): string {
     const config = vscode.workspace.getConfiguration('cypressTestExplorer');
     const cypressExecutable = config.get('cypressExecutable', 'npx cypress');
     const projectPath = config.get('projectPath', '');
-    const envVars = config.get('environmentVariables', {});
+    const envVars = config.get('runVariables', {});
 
     const projectOption = projectPath ? `--project "${projectPath}"` : '';
     const specOption = spec ? `--spec "${spec}"` : '';
