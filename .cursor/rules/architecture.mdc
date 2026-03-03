@@ -1,0 +1,14 @@
+---
+description: Architecture conventions for Cypress Test Explorer extension
+globs: src/**/*.ts
+alwaysApply: false
+---
+
+# Architecture
+
+- All string literals (command IDs, config keys, view IDs) live in `constants.ts` — never hardcode them
+- Config reads/writes go through `services/configService.ts` — never call `getConfiguration()` directly
+- `CypressRunner` owns test execution; `TestExplorer` owns UI orchestration
+- Use `ShellExecution` options for env vars, not string concatenation
+- Webviews must have a CSP with a nonce
+- See `ROADMAP.md` for the full improvement plan
