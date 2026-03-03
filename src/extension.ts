@@ -1,25 +1,28 @@
 import * as vscode from 'vscode';
-import { TestExplorer } from './features/testExplorer';
-import { RunVariablesView } from './features/runVariablesView';
+import { TestExplorer } from './views/testExplorer';
+import { RunVariablesViewProvider } from './providers/runVariablesViewProvider';
+import { COMMANDS, VIEW_IDS } from './constants';
+import { log, disposeLogger } from './services/logger';
 
-export function activate(context: vscode.ExtensionContext) {
-  console.log('Cypress Test Explorer is now active!');
+export function activate(context: vscode.ExtensionContext): void {
+  log('Cypress Test Explorer activated');
 
   const testExplorer = new TestExplorer(context);
   context.subscriptions.push(testExplorer);
 
-  const envVarsProvider = new RunVariablesView(context.extensionUri);
+  const runVariablesProvider = new RunVariablesViewProvider(context.extensionUri);
   context.subscriptions.push(
-    vscode.window.registerWebviewViewProvider('cypressRunVariables', envVarsProvider),
+    vscode.window.registerWebviewViewProvider(VIEW_IDS.RUN_VARIABLES, runVariablesProvider),
   );
 
   context.subscriptions.push(
-    vscode.commands.registerCommand('cypressTestExplorer.updateRunVariables', () => {
-      vscode.commands.executeCommand('cypressRunVariables.focus');
+    vscode.commands.registerCommand(COMMANDS.UPDATE_RUN_VARIABLES, () => {
+      vscode.commands.executeCommand(`${VIEW_IDS.RUN_VARIABLES}.focus`);
     }),
   );
 }
 
-export function deactivate() {
-  console.log('Cypress Test Explorer is now deactivated!');
+export function deactivate(): void {
+  log('Cypress Test Explorer deactivated');
+  disposeLogger();
 }
