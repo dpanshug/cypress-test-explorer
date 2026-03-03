@@ -118,9 +118,9 @@ export class TestExplorer implements vscode.Disposable {
   }
 
   private async setRunVariables(): Promise<void> {
-    const currentEnv = configService.getRunVariables();
+    const currentEnv = configService.getEnvironmentVariables();
     const envString = await vscode.window.showInputBox({
-      prompt: 'Enter run variables as KEY1=VALUE1,KEY2=VALUE2',
+      prompt: 'Enter environment variables as KEY1=VALUE1,KEY2=VALUE2',
       value: Object.entries(currentEnv)
         .map(([k, v]) => `${k}=${v}`)
         .join(','),
@@ -138,9 +138,9 @@ export class TestExplorer implements vscode.Disposable {
         {} as Record<string, string>,
       );
 
-      await configService.updateRunVariables(newEnv);
-      vscode.window.showInformationMessage('Run variables updated');
-      log(`Run variables updated via input box: ${JSON.stringify(newEnv)}`);
+      await configService.updateEnvironmentVariables(newEnv);
+      vscode.window.showInformationMessage('Environment variables updated');
+      log(`Environment variables updated via input box: ${JSON.stringify(newEnv)}`);
       this.refreshRunVariablesView();
       this.refresh();
     }

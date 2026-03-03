@@ -24,6 +24,8 @@ export const CONFIG = {
   CONFIG_FILE_PATH: 'configFilePath',
   PROJECT_PATH: 'projectPath',
   RUN_VARIABLES: 'runVariables',
+  ENVIRONMENT_VARIABLES: 'environmentVariables',
+  CYPRESS_ENV: 'cypressEnv',
   BROWSER: 'browser',
 } as const;
 

@@ -37,7 +37,7 @@
         },
         {
           "id": "cypressRunVariables",
-          "name": "Cypress Run Variables",
+          "name": "Cypress Variables",
           "type": "webview"
         }
       ]
@@ -144,7 +144,18 @@
         "cypressTestExplorer.runVariables": {
           "type": "object",
           "default": {},
-          "description": "Run variables to be set when running Cypress tests"
+          "description": "Deprecated — migrated to environmentVariables automatically",
+          "deprecationMessage": "Use cypressTestExplorer.environmentVariables and cypressTestExplorer.cypressEnv instead"
+        },
+        "cypressTestExplorer.environmentVariables": {
+          "type": "object",
+          "default": {},
+          "description": "OS-level environment variables passed to the Cypress process (e.g., CY_MOCK=1)"
+        },
+        "cypressTestExplorer.cypressEnv": {
+          "type": "object",
+          "default": {},
+          "description": "Cypress-specific env vars passed via --env flag, accessed with Cypress.env() (e.g., baseUrl=http://localhost)"
         },
         "cypressTestExplorer.browser": {
           "type": "string",

@@ -22,13 +22,15 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
 
     webviewView.onDidChangeVisibility(() => {
       if (webviewView.visible) {
-        webviewView.webview.postMessage({ type: 'update', value: this._getRunVariables() });
+        this._sendAllVariables();
       }
     });
   }
 
   private _getHtmlForWebview(webview: vscode.Webview): string {
     const nonce = crypto.randomBytes(16).toString('hex');
+    const initialEnvVars = JSON.stringify(configService.getEnvironmentVariables());
+    const initialCypressEnv = JSON.stringify(configService.getCypressEnv());
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -37,53 +39,279 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta http-equiv="Content-Security-Policy"
     content="default-src 'none'; style-src ${webview.cspSource} 'nonce-${nonce}'; script-src 'nonce-${nonce}';">
-  <title>Cypress Run Variables</title>
+  <title>Cypress Variables</title>
   <style nonce="${nonce}">
-    body { font-family: var(--vscode-font-family); padding: 10px; }
-    textarea { width: 100%; height: 200px; margin-bottom: 10px; }
-    button {
-      background-color: var(--vscode-button-background);
-      color: var(--vscode-button-foreground);
-      border: none; padding: 8px 12px; cursor: pointer;
+    * { box-sizing: border-box; }
+    body {
+      font-family: var(--vscode-font-family);
+      font-size: var(--vscode-font-size);
+      color: var(--vscode-foreground);
+      padding: 8px;
+      margin: 0;
     }
-    button:hover { background-color: var(--vscode-button-hoverBackground); }
-    .info { margin-bottom: 10px; color: var(--vscode-foreground); }
-    .error { color: var(--vscode-errorForeground); margin-top: 10px; }
+
+    .section { margin-bottom: 16px; }
+
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 4px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: var(--vscode-sideBarSectionHeader-foreground, var(--vscode-foreground));
+    }
+
+    .section-desc {
+      color: var(--vscode-descriptionForeground);
+      font-size: 11px;
+      margin-bottom: 8px;
+    }
+
+    .row {
+      display: flex;
+      gap: 4px;
+      margin-bottom: 4px;
+      align-items: center;
+    }
+
+    .row input {
+      flex: 1;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border, transparent);
+      padding: 3px 6px;
+      font-family: var(--vscode-editor-font-family, monospace);
+      font-size: 12px;
+      outline: none;
+      min-width: 0;
+    }
+
+    .row input:focus {
+      border-color: var(--vscode-focusBorder);
+    }
+
+    .row input::placeholder {
+      color: var(--vscode-input-placeholderForeground);
+    }
+
+    .delete-btn {
+      background: none;
+      border: none;
+      color: var(--vscode-descriptionForeground);
+      cursor: pointer;
+      padding: 2px 4px;
+      font-size: 14px;
+      line-height: 1;
+      border-radius: 3px;
+      flex-shrink: 0;
+    }
+
+    .delete-btn:hover {
+      background: var(--vscode-toolbar-hoverBackground, rgba(90, 93, 94, 0.31));
+      color: var(--vscode-errorForeground);
+    }
+
+    .actions {
+      display: flex;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .add-btn, .save-btn {
+      background: none;
+      border: none;
+      color: var(--vscode-textLink-foreground);
+      cursor: pointer;
+      padding: 2px 0;
+      font-size: 12px;
+      font-family: var(--vscode-font-family);
+    }
+
+    .add-btn:hover, .save-btn:hover {
+      text-decoration: underline;
+    }
+
+    .save-btn {
+      background: var(--vscode-button-background);
+      color: var(--vscode-button-foreground);
+      padding: 4px 12px;
+      border-radius: 2px;
+    }
+
+    .save-btn:hover {
+      background: var(--vscode-button-hoverBackground);
+      text-decoration: none;
+    }
+
+    .saved-indicator {
+      color: var(--vscode-testing-iconPassed, #73c991);
+      font-size: 11px;
+      opacity: 0;
+      transition: opacity 0.2s;
+      margin-left: 6px;
+    }
+
+    .saved-indicator.visible { opacity: 1; }
+
+    .empty-state {
+      color: var(--vscode-descriptionForeground);
+      font-size: 12px;
+      font-style: italic;
+      padding: 4px 0;
+    }
+
+    .separator {
+      border: none;
+      border-top: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-panel-border, rgba(128,128,128,0.2)));
+      margin: 12px 0;
+    }
   </style>
 </head>
 <body>
-  <div class="info">
-    Define environment variables to prefix the Cypress run command.
-    <br><br>
-    Enter run variables as KEY=VALUE pairs, one per line.
-    Invalid entries will be ignored.
+  <div class="section" id="envVarsSection">
+    <div class="section-header">
+      <span class="section-title">Environment Variables</span>
+    </div>
+    <div class="section-desc">OS-level variables for the Cypress process</div>
+    <div id="envVarsRows"></div>
+    <div class="actions">
+      <a class="add-btn" id="addEnvVar">+ Add Variable</a>
+      <span style="flex:1"></span>
+      <button class="save-btn" id="saveEnvVars">Save</button>
+      <span class="saved-indicator" id="envVarsSaved">Saved</span>
+    </div>
   </div>
-  <textarea id="runVars" placeholder="KEY1=VALUE1&#10;KEY2=VALUE2"></textarea>
-  <button id="saveButton">Save</button>
-  <div id="errorMessage" class="error"></div>
+
+  <hr class="separator">
+
+  <div class="section" id="cypressEnvSection">
+    <div class="section-header">
+      <span class="section-title">Cypress Env</span>
+    </div>
+    <div class="section-desc">Passed via --env, accessed with Cypress.env()</div>
+    <div id="cypressEnvRows"></div>
+    <div class="actions">
+      <a class="add-btn" id="addCypressEnv">+ Add Variable</a>
+      <span style="flex:1"></span>
+      <button class="save-btn" id="saveCypressEnv">Save</button>
+      <span class="saved-indicator" id="cypressEnvSaved">Saved</span>
+    </div>
+  </div>
+
   <script nonce="${nonce}">
     const vscode = acquireVsCodeApi();
-    const textarea = document.getElementById('runVars');
-    const saveButton = document.getElementById('saveButton');
-    const errorMessage = document.getElementById('errorMessage');
 
-    vscode.postMessage({ type: 'getVariables' });
+    function createRow(container, key, value) {
+      const row = document.createElement('div');
+      row.className = 'row';
+
+      const keyInput = document.createElement('input');
+      keyInput.type = 'text';
+      keyInput.placeholder = 'KEY';
+      keyInput.value = key || '';
+
+      const valueInput = document.createElement('input');
+      valueInput.type = 'text';
+      valueInput.placeholder = 'value';
+      valueInput.value = value || '';
+
+      const deleteBtn = document.createElement('button');
+      deleteBtn.className = 'delete-btn';
+      deleteBtn.textContent = '\\u00d7';
+      deleteBtn.title = 'Remove';
+      deleteBtn.addEventListener('click', () => row.remove());
+
+      row.appendChild(keyInput);
+      row.appendChild(valueInput);
+      row.appendChild(deleteBtn);
+      container.appendChild(row);
+
+      if (!key) keyInput.focus();
+    }
+
+    function renderRows(containerId, vars) {
+      const container = document.getElementById(containerId);
+      container.innerHTML = '';
+      const entries = Object.entries(vars);
+      if (entries.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'empty-state';
+        empty.textContent = 'No variables set';
+        container.appendChild(empty);
+        return;
+      }
+      entries.forEach(([key, value]) => createRow(container, key, value));
+    }
+
+    function collectVars(containerId) {
+      const container = document.getElementById(containerId);
+      const rows = container.querySelectorAll('.row');
+      const vars = {};
+      rows.forEach(row => {
+        const inputs = row.querySelectorAll('input');
+        const key = inputs[0].value.trim();
+        const value = inputs[1].value.trim();
+        if (key) vars[key] = value;
+      });
+      return vars;
+    }
+
+    function flashSaved(id) {
+      const el = document.getElementById(id);
+      el.classList.add('visible');
+      setTimeout(() => el.classList.remove('visible'), 1500);
+    }
+
+    document.getElementById('addEnvVar').addEventListener('click', () => {
+      const container = document.getElementById('envVarsRows');
+      const empty = container.querySelector('.empty-state');
+      if (empty) empty.remove();
+      createRow(container, '', '');
+    });
+
+    document.getElementById('addCypressEnv').addEventListener('click', () => {
+      const container = document.getElementById('cypressEnvRows');
+      const empty = container.querySelector('.empty-state');
+      if (empty) empty.remove();
+      createRow(container, '', '');
+    });
+
+    document.getElementById('saveEnvVars').addEventListener('click', () => {
+      const vars = collectVars('envVarsRows');
+      vscode.postMessage({ type: 'saveEnvVars', value: vars });
+    });
+
+    document.getElementById('saveCypressEnv').addEventListener('click', () => {
+      const vars = collectVars('cypressEnvRows');
+      vscode.postMessage({ type: 'saveCypressEnv', value: vars });
+    });
 
     window.addEventListener('message', event => {
       const message = event.data;
       switch (message.type) {
-        case 'update':
-          textarea.value = message.value;
+        case 'updateEnvVars':
+          renderRows('envVarsRows', message.value);
           break;
-        case 'error':
-          errorMessage.textContent = message.value;
+        case 'updateCypressEnv':
+          renderRows('cypressEnvRows', message.value);
+          break;
+        case 'envVarsSaved':
+          flashSaved('envVarsSaved');
+          break;
+        case 'cypressEnvSaved':
+          flashSaved('cypressEnvSaved');
           break;
       }
     });
 
-    saveButton.addEventListener('click', () => {
-      vscode.postMessage({ type: 'save', value: textarea.value });
-    });
+    renderRows('envVarsRows', ${initialEnvVars});
+    renderRows('cypressEnvRows', ${initialCypressEnv});
   </script>
 </body>
 </html>`;
@@ -94,16 +322,29 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
       async (message) => {
         try {
           switch (message.type) {
-            case 'save':
-              await this._saveRunVariables(message.value);
+            case 'saveEnvVars':
+              await configService.updateEnvironmentVariables(
+                message.value,
+                vscode.ConfigurationTarget.Workspace,
+              );
+              log(`Environment variables updated: ${JSON.stringify(message.value)}`);
+              webview.postMessage({ type: 'envVarsSaved' });
+              break;
+            case 'saveCypressEnv':
+              await configService.updateCypressEnv(
+                message.value,
+                vscode.ConfigurationTarget.Workspace,
+              );
+              log(`Cypress env updated: ${JSON.stringify(message.value)}`);
+              webview.postMessage({ type: 'cypressEnvSaved' });
               break;
             case 'getVariables':
-              webview.postMessage({ type: 'update', value: this._getRunVariables() });
+              this._sendAllVariables();
               break;
           }
         } catch (error) {
           logError('Failed to handle webview message', error);
-          vscode.window.showErrorMessage('Failed to update run variables.');
+          vscode.window.showErrorMessage('Failed to update variables.');
         }
       },
       undefined,
@@ -111,42 +352,14 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
     );
   }
 
-  private _getRunVariables(): string {
-    const runVars = configService.getRunVariables();
-    return Object.entries(runVars)
-      .map(([key, value]) => `${key}=${value}`)
-      .join('\n');
-  }
-
-  private async _saveRunVariables(envString: string): Promise<void> {
-    const lines = envString.split('\n');
-    const runVars: Record<string, string> = {};
-    const invalidLines: string[] = [];
-
-    lines.forEach((line, index) => {
-      line = line.trim();
-      if (line) {
-        const match = line.match(/^([^=]+)=(.*)$/);
-        if (match) {
-          const [, key, value] = match;
-          runVars[key.trim()] = value.trim();
-        } else {
-          invalidLines.push(`Line ${index + 1}: ${line}`);
-        }
-      }
+  private _sendAllVariables(): void {
+    this._view?.webview.postMessage({
+      type: 'updateEnvVars',
+      value: configService.getEnvironmentVariables(),
     });
-
-    if (invalidLines.length > 0) {
-      const errorMessage = `The following lines are invalid and will be ignored:\n${invalidLines.join('\n')}`;
-      this._view?.webview.postMessage({ type: 'error', value: errorMessage });
-    } else {
-      this._view?.webview.postMessage({ type: 'error', value: '' });
-    }
-
-    await configService.updateRunVariables(runVars, vscode.ConfigurationTarget.Workspace);
-    log(`Run variables updated: ${JSON.stringify(runVars)}`);
-
-    vscode.window.showInformationMessage('Cypress run variables updated');
-    this._view?.webview.postMessage({ type: 'update', value: this._getRunVariables() });
+    this._view?.webview.postMessage({
+      type: 'updateCypressEnv',
+      value: configService.getCypressEnv(),
+    });
   }
 }

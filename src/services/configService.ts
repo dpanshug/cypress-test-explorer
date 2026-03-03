@@ -25,6 +25,14 @@ export function getRunVariables(): Record<string, string> {
   return getConfig().get<Record<string, string>>(CONFIG.RUN_VARIABLES, {});
 }
 
+export function getEnvironmentVariables(): Record<string, string> {
+  return getConfig().get<Record<string, string>>(CONFIG.ENVIRONMENT_VARIABLES, {});
+}
+
+export function getCypressEnv(): Record<string, string> {
+  return getConfig().get<Record<string, string>>(CONFIG.CYPRESS_ENV, {});
+}
+
 export function getBrowser(): string {
   return getConfig().get<string>(CONFIG.BROWSER, '');
 }
@@ -46,4 +54,23 @@ export async function updateRunVariables(
   target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global,
 ): Promise<void> {
   await getConfig().update(CONFIG.RUN_VARIABLES, value, target);
+}
+
+export async function updateEnvironmentVariables(
+  value: Record<string, string>,
+  target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Workspace,
+): Promise<void> {
+  await getConfig().update(CONFIG.ENVIRONMENT_VARIABLES, value, target);
+}
+
+export async function updateCypressEnv(
+  value: Record<string, string>,
+  target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Workspace,
+): Promise<void> {
+  await getConfig().update(CONFIG.CYPRESS_ENV, value, target);
+}
+
+export async function clearRunVariables(): Promise<void> {
+  await getConfig().update(CONFIG.RUN_VARIABLES, undefined, vscode.ConfigurationTarget.Global);
+  await getConfig().update(CONFIG.RUN_VARIABLES, undefined, vscode.ConfigurationTarget.Workspace);
 }

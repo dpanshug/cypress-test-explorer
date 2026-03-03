@@ -7,6 +7,7 @@ import { log } from './logger';
 interface QueuedTest {
   command: string;
   testName: string;
+  env: Record<string, string>;
 }
 
 export class CypressRunner implements vscode.Disposable {
@@ -18,9 +19,10 @@ export class CypressRunner implements vscode.Disposable {
   queueTest(test: TestFile): void {
     const testPath = vscode.workspace.asRelativePath(test.resourceUri.fsPath);
     const command = this.buildCommand('run', testPath);
+    const env = configService.getEnvironmentVariables();
     const testName = path.basename(testPath);
 
-    this.testQueue.push({ command, testName });
+    this.testQueue.push({ command, testName, env });
     vscode.window.showInformationMessage(`Test queued: ${testName}`);
     log(`Test queued: ${testName} — ${command}`);
 
@@ -32,6 +34,7 @@ export class CypressRunner implements vscode.Disposable {
   openTest(test: TestFile): void {
     const testPath = vscode.workspace.asRelativePath(test.resourceUri.fsPath);
     const command = this.buildCommand('open', testPath);
+    const env = configService.getEnvironmentVariables();
     const testName = path.basename(testPath);
 
     log(`Opening in Cypress: ${testName} — ${command}`);
@@ -41,7 +44,7 @@ export class CypressRunner implements vscode.Disposable {
       vscode.TaskScope.Workspace,
       `Open Test: ${testName}`,
       'Cypress Test Explorer',
-      new vscode.ShellExecution(command),
+      new vscode.ShellExecution(command, { env }),
     );
     task.isBackground = true;
 
@@ -53,8 +56,9 @@ export class CypressRunner implements vscode.Disposable {
     const startingFolder = configService.getStartingFolder();
     const specPattern = startingFolder ? `'${startingFolder}/*.cy.{js,ts,jsx,tsx}'` : '';
     const command = this.buildCommand('run', specPattern);
+    const env = configService.getEnvironmentVariables();
 
-    this.testQueue.push({ command, testName: 'All Tests' });
+    this.testQueue.push({ command, testName: 'All Tests', env });
     vscode.window.showInformationMessage('All tests queued');
     log(`All tests queued — ${command}`);
 
@@ -67,17 +71,10 @@ export class CypressRunner implements vscode.Disposable {
     const cypressExecutable = configService.getCypressExecutable();
     const projectPath = configService.getProjectPath();
     const configFilePath = configService.getConfigFilePath();
-    const envVars = configService.getRunVariables();
+    const cypressEnv = configService.getCypressEnv();
     const browser = configService.getBrowser();
 
     const parts: string[] = [];
-
-    const envString = Object.entries(envVars)
-      .map(([k, v]) => `${k}=${v}`)
-      .join(' ');
-    if (envString) {
-      parts.push(envString);
-    }
 
     parts.push(cypressExecutable, mode);
 
@@ -104,6 +101,14 @@ export class CypressRunner implements vscode.Disposable {
     } else if (mode === 'open') {
       parts.push('--browser chrome');
     }
+
+    const envFlag = Object.entries(cypressEnv)
+      .map(([k, v]) => `${k}=${v}`)
+      .join(',');
+    if (envFlag) {
+      parts.push(`--env ${envFlag}`);
+    }
+
     return parts.join(' ');
   }
 
@@ -115,7 +120,7 @@ export class CypressRunner implements vscode.Disposable {
     }
 
     this.isRunning = true;
-    const { command, testName } = this.testQueue.shift()!;
+    const { command, testName, env } = this.testQueue.shift()!;
     this.currentTest = testName;
 
     vscode.window.showInformationMessage(`Running test: ${this.currentTest}`);
@@ -126,7 +131,7 @@ export class CypressRunner implements vscode.Disposable {
       vscode.TaskScope.Workspace,
       `Run Test: ${testName}`,
       'Cypress Test Explorer',
-      new vscode.ShellExecution(command),
+      new vscode.ShellExecution(command, { env }),
     );
 
     const disposable = vscode.tasks.onDidEndTaskProcess((e) => {
