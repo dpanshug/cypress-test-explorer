@@ -17,7 +17,7 @@ export class CypressRunner implements vscode.Disposable {
 
   queueTest(test: TestFile): void {
     const testPath = vscode.workspace.asRelativePath(test.resourceUri.fsPath);
-    const command = this.buildCommand(testPath);
+    const command = this.buildCommand('run', testPath);
     const testName = path.basename(testPath);
 
     this.testQueue.push({ command, testName });
@@ -29,10 +29,30 @@ export class CypressRunner implements vscode.Disposable {
     }
   }
 
+  openTest(test: TestFile): void {
+    const testPath = vscode.workspace.asRelativePath(test.resourceUri.fsPath);
+    const command = this.buildCommand('open', testPath);
+    const testName = path.basename(testPath);
+
+    log(`Opening in Cypress: ${testName} — ${command}`);
+
+    const task = new vscode.Task(
+      { type: 'shell' },
+      vscode.TaskScope.Workspace,
+      `Open Test: ${testName}`,
+      'Cypress Test Explorer',
+      new vscode.ShellExecution(command),
+    );
+    task.isBackground = true;
+
+    vscode.tasks.executeTask(task);
+    vscode.window.showInformationMessage(`Opening in Cypress: ${testName}`);
+  }
+
   queueAllTests(): void {
     const startingFolder = configService.getStartingFolder();
     const specPattern = startingFolder ? `'${startingFolder}/*.cy.{js,ts,jsx,tsx}'` : '';
-    const command = this.buildCommand(specPattern);
+    const command = this.buildCommand('run', specPattern);
 
     this.testQueue.push({ command, testName: 'All Tests' });
     vscode.window.showInformationMessage('All tests queued');
@@ -43,11 +63,12 @@ export class CypressRunner implements vscode.Disposable {
     }
   }
 
-  private buildCommand(spec?: string): string {
+  private buildCommand(mode: 'run' | 'open', spec?: string): string {
     const cypressExecutable = configService.getCypressExecutable();
     const projectPath = configService.getProjectPath();
     const configFilePath = configService.getConfigFilePath();
     const envVars = configService.getRunVariables();
+    const browser = configService.getBrowser();
 
     const parts: string[] = [];
 
@@ -58,7 +79,11 @@ export class CypressRunner implements vscode.Disposable {
       parts.push(envString);
     }
 
-    parts.push(cypressExecutable, 'run');
+    parts.push(cypressExecutable, mode);
+
+    if (mode === 'open') {
+      parts.push('--e2e');
+    }
 
     if (projectPath) {
       parts.push(`--project "${projectPath}"`);
@@ -67,9 +92,18 @@ export class CypressRunner implements vscode.Disposable {
       parts.push(`--config-file "${configFilePath}"`);
     }
     if (spec) {
-      parts.push(`--spec "${spec}"`);
+      const resolvedSpec = projectPath ? path.relative(projectPath, spec) : spec;
+      if (mode === 'run') {
+        parts.push(`--spec "${spec}"`);
+      } else {
+        parts.push(`--config specPattern="${resolvedSpec}"`);
+      }
     }
-
+    if (browser) {
+      parts.push(`--browser ${browser}`);
+    } else if (mode === 'open') {
+      parts.push('--browser chrome');
+    }
     return parts.join(' ');
   }
 

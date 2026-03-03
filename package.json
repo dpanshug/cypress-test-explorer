@@ -75,6 +75,11 @@
       {
         "command": "cypressTestExplorer.setCypressExecutable",
         "title": "Set Cypress Executable command"
+      },
+      {
+        "command": "cypressTestExplorer.openTest",
+        "title": "Open in Cypress",
+        "icon": "$(debug-alt)"
       }
     ],
     "menus": {
@@ -104,7 +109,12 @@
         {
           "command": "cypressTestExplorer.runTest",
           "when": "view == cypressTestExplorer && viewItem == cypressTest",
-          "group": "inline"
+          "group": "inline@1"
+        },
+        {
+          "command": "cypressTestExplorer.openTest",
+          "when": "view == cypressTestExplorer && viewItem == cypressTest",
+          "group": "inline@2"
         }
       ]
     },
@@ -135,6 +145,19 @@
           "type": "object",
           "default": {},
           "description": "Run variables to be set when running Cypress tests"
+        },
+        "cypressTestExplorer.browser": {
+          "type": "string",
+          "default": "",
+          "enum": ["", "chrome", "firefox", "edge", "electron"],
+          "enumDescriptions": [
+            "Default (Cypress chooses)",
+            "Google Chrome",
+            "Mozilla Firefox",
+            "Microsoft Edge",
+            "Electron (built-in)"
+          ],
+          "description": "Browser to use when running Cypress tests"
         }
       }
     }

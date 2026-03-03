@@ -37,6 +37,7 @@ export class TestExplorer implements vscode.Disposable {
       [COMMANDS.SET_PROJECT_PATH, () => this.setProjectPath()],
       [COMMANDS.SET_RUN_VARIABLES, () => this.setRunVariables()],
       [COMMANDS.RUN_TEST, (test) => this.cypressRunner.queueTest(test)],
+      [COMMANDS.OPEN_TEST, (test) => this.cypressRunner.openTest(test)],
       [COMMANDS.RUN_ALL_TESTS, () => this.cypressRunner.queueAllTests()],
       [COMMANDS.SET_CYPRESS_EXECUTABLE, () => this.setCypressExecutable()],
     ];

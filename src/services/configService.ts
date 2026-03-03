@@ -25,6 +25,10 @@ export function getRunVariables(): Record<string, string> {
   return getConfig().get<Record<string, string>>(CONFIG.RUN_VARIABLES, {});
 }
 
+export function getBrowser(): string {
+  return getConfig().get<string>(CONFIG.BROWSER, '');
+}
+
 export async function updateStartingFolder(value: string): Promise<void> {
   await getConfig().update(CONFIG.STARTING_FOLDER, value, true);
 }

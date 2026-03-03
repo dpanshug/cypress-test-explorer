@@ -14,6 +14,7 @@ export const COMMANDS = {
   RUN_ALL_TESTS: `${EXTENSION_ID}.runAllTests`,
   SET_CYPRESS_EXECUTABLE: `${EXTENSION_ID}.setCypressExecutable`,
   UPDATE_RUN_VARIABLES: `${EXTENSION_ID}.updateRunVariables`,
+  OPEN_TEST: `${EXTENSION_ID}.openTest`,
 } as const;
 
 export const CONFIG = {
@@ -23,6 +24,7 @@ export const CONFIG = {
   CONFIG_FILE_PATH: 'configFilePath',
   PROJECT_PATH: 'projectPath',
   RUN_VARIABLES: 'runVariables',
+  BROWSER: 'browser',
 } as const;
 
 export const TEST_FILE_EXTENSIONS = ['.cy.ts', '.cy.js', '.cy.tsx', '.cy.jsx'] as const;
