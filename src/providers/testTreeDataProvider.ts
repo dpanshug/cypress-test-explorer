@@ -1,34 +1,35 @@
 import * as vscode from 'vscode';
 import * as fs from 'fs';
 import * as path from 'path';
+import { TestFile } from '../models/testFile';
+import { TEST_FILE_EXTENSIONS } from '../constants';
+import * as configService from '../services/configService';
 
-export class TestFile extends vscode.TreeItem {
-  constructor(
-    public readonly label: string,
-    public readonly collapsibleState: vscode.TreeItemCollapsibleState,
-    public readonly resourceUri: vscode.Uri,
-  ) {
-    super(label, collapsibleState);
-    this.tooltip = this.resourceUri.fsPath;
+export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile>, vscode.Disposable {
+  private _onDidChangeTreeData = new vscode.EventEmitter<TestFile | undefined | null | void>();
+  readonly onDidChangeTreeData = this._onDidChangeTreeData.event;
 
-    if (this.collapsibleState === vscode.TreeItemCollapsibleState.None) {
-      this.command = {
-        command: 'vscode.open',
-        title: 'Open File',
-        arguments: [this.resourceUri],
-      };
-      this.contextValue = 'cypressTest';
-    }
+  private fileWatcher: vscode.FileSystemWatcher | undefined;
+
+  constructor(private workspaceRoot: string) {
+    this.setupFileWatcher();
   }
-}
 
-export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
-  private _onDidChangeTreeData: vscode.EventEmitter<TestFile | undefined | null | void> =
-    new vscode.EventEmitter<TestFile | undefined | null | void>();
-  readonly onDidChangeTreeData: vscode.Event<TestFile | undefined | null | void> =
-    this._onDidChangeTreeData.event;
+  private setupFileWatcher(): void {
+    if (!this.workspaceRoot) {
+      return;
+    }
 
-  constructor(private workspaceRoot: string) {}
+    const pattern = new vscode.RelativePattern(
+      this.workspaceRoot,
+      '**/*.cy.{ts,js,tsx,jsx}',
+    );
+
+    this.fileWatcher = vscode.workspace.createFileSystemWatcher(pattern);
+    this.fileWatcher.onDidCreate(() => this.refresh());
+    this.fileWatcher.onDidDelete(() => this.refresh());
+    this.fileWatcher.onDidChange(() => this.refresh());
+  }
 
   refresh(): void {
     this._onDidChangeTreeData.fire();
@@ -44,9 +45,7 @@ export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
       return Promise.resolve([]);
     }
 
-    const startingFolder = vscode.workspace
-      .getConfiguration('cypressTestExplorer')
-      .get('startingFolder', '');
+    const startingFolder = configService.getStartingFolder();
     const rootDir = startingFolder
       ? path.join(this.workspaceRoot, startingFolder)
       : this.workspaceRoot;
@@ -59,7 +58,9 @@ export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
   }
 
   private async getTestFiles(dir: string): Promise<TestFile[]> {
-    if (!fs.existsSync(dir)) {
+    try {
+      await fs.promises.access(dir);
+    } catch {
       return [];
     }
 
@@ -76,7 +77,7 @@ export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
             return new TestFile(entry.name, vscode.TreeItemCollapsibleState.Collapsed, uri);
           }
           return null;
-        } else if (entry.name.endsWith('.cy.ts') || entry.name.endsWith('.cy.js')) {
+        } else if (this.isTestFile(entry.name)) {
           return new TestFile(entry.name, vscode.TreeItemCollapsibleState.None, uri);
         }
         return null;
@@ -91,5 +92,14 @@ export class TestTreeDataProvider implements vscode.TreeDataProvider<TestFile> {
       }
       return b.collapsibleState - a.collapsibleState;
     });
+  }
+
+  private isTestFile(filename: string): boolean {
+    return TEST_FILE_EXTENSIONS.some((ext) => filename.endsWith(ext));
+  }
+
+  dispose(): void {
+    this.fileWatcher?.dispose();
+    this._onDidChangeTreeData.dispose();
   }
 }
