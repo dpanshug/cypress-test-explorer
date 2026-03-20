@@ -31,6 +31,13 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
     const nonce = crypto.randomBytes(16).toString('hex');
     const initialEnvVars = JSON.stringify(configService.getEnvironmentVariables());
     const initialCypressEnv = JSON.stringify(configService.getCypressEnv());
+    const initialConfig = JSON.stringify({
+      startingFolder: configService.getStartingFolder(),
+      projectPath: configService.getProjectPath(),
+      configFilePath: configService.getConfigFilePath(),
+      cypressExecutable: configService.getCypressExecutable(),
+      browser: configService.getBrowser(),
+    });
 
     return `<!DOCTYPE html>
 <html lang="en">
@@ -171,9 +178,120 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
       border-top: 1px solid var(--vscode-sideBarSectionHeader-border, var(--vscode-panel-border, rgba(128,128,128,0.2)));
       margin: 12px 0;
     }
+
+    .config-row {
+      margin-bottom: 12px;
+    }
+
+    .config-row label {
+      display: block;
+      font-size: 11px;
+      color: var(--vscode-foreground);
+      margin-bottom: 3px;
+    }
+
+    .config-hint {
+      color: var(--vscode-descriptionForeground);
+      font-size: 11px;
+      margin-top: 3px;
+      line-height: 1.4;
+    }
+
+    .config-row input,
+    .config-row select {
+      width: 100%;
+      background: var(--vscode-input-background);
+      color: var(--vscode-input-foreground);
+      border: 1px solid var(--vscode-input-border, transparent);
+      padding: 3px 6px;
+      font-family: var(--vscode-editor-font-family, monospace);
+      font-size: 12px;
+      outline: none;
+    }
+
+    .config-row input:focus,
+    .config-row select:focus {
+      border-color: var(--vscode-focusBorder);
+    }
+
+    .config-row input::placeholder {
+      color: var(--vscode-input-placeholderForeground);
+    }
+
+    .config-row select {
+      font-family: var(--vscode-font-family);
+      cursor: pointer;
+    }
+
+    .config-row select option {
+      background: var(--vscode-dropdown-background, var(--vscode-input-background));
+      color: var(--vscode-dropdown-foreground, var(--vscode-input-foreground));
+    }
+
+    .config-info {
+      display: none;
+      font-size: 11px;
+      color: var(--vscode-descriptionForeground);
+      background: var(--vscode-textBlockQuote-background, rgba(127,127,127,0.1));
+      border-left: 3px solid var(--vscode-textLink-foreground);
+      padding: 6px 8px;
+      margin-top: 10px;
+      line-height: 1.4;
+    }
+
+    .config-info.visible { display: block; }
+
+    .config-info strong {
+      color: var(--vscode-foreground);
+    }
   </style>
 </head>
 <body>
+  <div class="section" id="configSection">
+    <div class="section-header">
+      <span class="section-title">Configuration</span>
+    </div>
+    <div class="section-desc">All fields are optional — leave empty to use defaults</div>
+    <div class="config-row">
+      <label for="startingFolder">Tests Directory</label>
+      <input type="text" id="startingFolder" placeholder="e.g. cypress/e2e">
+      <div class="config-hint">Folder to scan for *.cy.{ts,js} test files (relative to workspace root)</div>
+    </div>
+    <div class="config-row">
+      <label for="projectPath">Cypress Project</label>
+      <input type="text" id="projectPath" placeholder="e.g. packages/cypress">
+      <div class="config-hint">Directory containing your cypress.config file (passed as --project)</div>
+    </div>
+    <div class="config-row">
+      <label for="configFilePath">Config File</label>
+      <input type="text" id="configFilePath" placeholder="e.g. cypress.config.ts">
+      <div class="config-hint">Only needed if the config file has a non-standard name or location</div>
+    </div>
+    <div class="config-row">
+      <label for="cypressExecutable">Cypress Command</label>
+      <input type="text" id="cypressExecutable" placeholder="npx cypress">
+      <div class="config-hint">Command used to run Cypress (default: npx cypress)</div>
+    </div>
+    <div class="config-row">
+      <label for="browser">Browser</label>
+      <select id="browser">
+        <option value="">Default (Cypress chooses)</option>
+        <option value="chrome">Chrome</option>
+        <option value="firefox">Firefox</option>
+        <option value="edge">Edge</option>
+        <option value="electron">Electron</option>
+      </select>
+    </div>
+    <div class="actions">
+      <span style="flex:1"></span>
+      <button class="save-btn" id="saveConfig">Save</button>
+      <span class="saved-indicator" id="configSaved">Saved</span>
+    </div>
+    <div class="config-info" id="resolvedPatterns"></div>
+  </div>
+
+  <hr class="separator">
+
   <div class="section" id="envVarsSection">
     <div class="section-header">
       <span class="section-title">Environment Variables</span>
@@ -268,6 +386,28 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
       setTimeout(() => el.classList.remove('visible'), 1500);
     }
 
+    function renderConfig(config) {
+      document.getElementById('startingFolder').value = config.startingFolder || '';
+      document.getElementById('projectPath').value = config.projectPath || '';
+      document.getElementById('configFilePath').value = config.configFilePath || '';
+      document.getElementById('cypressExecutable').value = config.cypressExecutable || '';
+      document.getElementById('browser').value = config.browser || '';
+    }
+
+    function collectConfig() {
+      return {
+        startingFolder: document.getElementById('startingFolder').value.trim(),
+        projectPath: document.getElementById('projectPath').value.trim(),
+        configFilePath: document.getElementById('configFilePath').value.trim(),
+        cypressExecutable: document.getElementById('cypressExecutable').value.trim(),
+        browser: document.getElementById('browser').value,
+      };
+    }
+
+    document.getElementById('saveConfig').addEventListener('click', () => {
+      vscode.postMessage({ type: 'saveConfig', value: collectConfig() });
+    });
+
     document.getElementById('addEnvVar').addEventListener('click', () => {
       const container = document.getElementById('envVarsRows');
       const empty = container.querySelector('.empty-state');
@@ -295,6 +435,22 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
     window.addEventListener('message', event => {
       const message = event.data;
       switch (message.type) {
+        case 'updateConfig':
+          renderConfig(message.value);
+          break;
+        case 'configSaved':
+          flashSaved('configSaved');
+          break;
+        case 'updateResolvedPatterns': {
+          const el = document.getElementById('resolvedPatterns');
+          if (message.extensions && message.source) {
+            el.innerHTML = 'Scanning for: <strong>' + message.extensions.join(', ') + '</strong> (from ' + message.source + ')';
+            el.classList.add('visible');
+          } else {
+            el.classList.remove('visible');
+          }
+          break;
+        }
         case 'updateEnvVars':
           renderRows('envVarsRows', message.value);
           break;
@@ -310,6 +466,7 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
       }
     });
 
+    renderConfig(${initialConfig});
     renderRows('envVarsRows', ${initialEnvVars});
     renderRows('cypressEnvRows', ${initialCypressEnv});
   </script>
@@ -322,6 +479,15 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
       async (message) => {
         try {
           switch (message.type) {
+            case 'saveConfig':
+              await configService.updateStartingFolder(message.value.startingFolder);
+              await configService.updateProjectPath(message.value.projectPath);
+              await configService.updateConfigFilePath(message.value.configFilePath);
+              await configService.updateCypressExecutable(message.value.cypressExecutable);
+              await configService.updateBrowser(message.value.browser);
+              log(`Configuration updated: ${JSON.stringify(message.value)}`);
+              webview.postMessage({ type: 'configSaved' });
+              break;
             case 'saveEnvVars':
               await configService.updateEnvironmentVariables(
                 message.value,
@@ -352,7 +518,25 @@ export class RunVariablesViewProvider implements vscode.WebviewViewProvider {
     );
   }
 
+  public updateResolvedPatterns(extensions: string[] | null, source: string | null): void {
+    this._view?.webview.postMessage({
+      type: 'updateResolvedPatterns',
+      extensions,
+      source,
+    });
+  }
+
   private _sendAllVariables(): void {
+    this._view?.webview.postMessage({
+      type: 'updateConfig',
+      value: {
+        startingFolder: configService.getStartingFolder(),
+        projectPath: configService.getProjectPath(),
+        configFilePath: configService.getConfigFilePath(),
+        cypressExecutable: configService.getCypressExecutable(),
+        browser: configService.getBrowser(),
+      },
+    });
     this._view?.webview.postMessage({
       type: 'updateEnvVars',
       value: configService.getEnvironmentVariables(),

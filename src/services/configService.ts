@@ -49,6 +49,14 @@ export async function updateProjectPath(value: string): Promise<void> {
   await getConfig().update(CONFIG.PROJECT_PATH, value, true);
 }
 
+export async function updateConfigFilePath(value: string): Promise<void> {
+  await getConfig().update(CONFIG.CONFIG_FILE_PATH, value, true);
+}
+
+export async function updateBrowser(value: string): Promise<void> {
+  await getConfig().update(CONFIG.BROWSER, value, true);
+}
+
 export async function updateRunVariables(
   value: Record<string, string>,
   target: vscode.ConfigurationTarget = vscode.ConfigurationTarget.Global,

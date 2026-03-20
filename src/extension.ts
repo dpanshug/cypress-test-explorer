@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { TestExplorer } from './views/testExplorer';
+import { CypressTestController } from './controllers/testController';
 import { RunVariablesViewProvider } from './providers/runVariablesViewProvider';
 import { COMMANDS, VIEW_IDS } from './constants';
 import { log, disposeLogger } from './services/logger';
@@ -10,13 +10,17 @@ export function activate(context: vscode.ExtensionContext): void {
 
   migrateRunVariables(context);
 
-  const testExplorer = new TestExplorer(context);
-  context.subscriptions.push(testExplorer);
-
   const runVariablesProvider = new RunVariablesViewProvider(context.extensionUri);
   context.subscriptions.push(
     vscode.window.registerWebviewViewProvider(VIEW_IDS.RUN_VARIABLES, runVariablesProvider),
   );
+
+  const testController = new CypressTestController(context);
+  context.subscriptions.push(testController);
+
+  testController.onPatternsResolved = (extensions, source) => {
+    runVariablesProvider.updateResolvedPatterns(extensions, source);
+  };
 
   context.subscriptions.push(
     vscode.commands.registerCommand(COMMANDS.UPDATE_RUN_VARIABLES, () => {

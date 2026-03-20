@@ -10,114 +10,46 @@
   "version": "1.0.3",
   "icon": "images/icon.png",
   "engines": {
-    "vscode": "^1.60.0"
+    "vscode": "^1.73.0"
   },
   "categories": [
     "Testing"
   ],
   "activationEvents": [
-    "onView:cypressTestExplorer"
+    "workspaceContains:**/*.cy.ts",
+    "workspaceContains:**/*.cy.js",
+    "workspaceContains:**/*.cy.tsx",
+    "workspaceContains:**/*.cy.jsx"
   ],
   "main": "./dist/extension.js",
   "contributes": {
-    "viewsContainers": {
-      "activitybar": [
-        {
-          "id": "cypress-test-explorer",
-          "title": "Cypress Test Explorer",
-          "icon": "$(beaker)"
-        }
-      ]
-    },
     "views": {
-      "cypress-test-explorer": [
-        {
-          "id": "cypressTestExplorer",
-          "name": "Test Explorer"
-        },
+      "test": [
         {
           "id": "cypressRunVariables",
-          "name": "Cypress Variables",
+          "name": "Cypress Test Explorer",
           "type": "webview"
         }
       ]
     },
     "commands": [
       {
-        "command": "cypressTestExplorer.refresh",
-        "title": "Refresh Cypress Tests",
-        "icon": "$(refresh)"
-      },
-      {
         "command": "cypressTestExplorer.setStartingFolder",
-        "title": "Set Cypress Root Folder",
-        "icon": "$(folder)"
-      },
-      {
-        "command": "cypressTestExplorer.runTest",
-        "title": "Run Cypress Test",
-        "icon": "$(play)"
-      },
-      {
-        "command": "cypressTestExplorer.runAllTests",
-        "title": "Run All Cypress Tests",
-        "icon": "$(run-all)"
+        "title": "Cypress: Set Root Folder"
       },
       {
         "command": "cypressTestExplorer.setProjectPath",
-        "title": "Set Cypress Project Path",
-        "icon": "$(file-code)"
+        "title": "Cypress: Set Project Path"
       },
       {
         "command": "cypressTestExplorer.updateRunVariables",
-        "title": "Update Cypress Run Variables"
+        "title": "Cypress: Update Run Variables"
       },
       {
         "command": "cypressTestExplorer.setCypressExecutable",
-        "title": "Set Cypress Executable command"
-      },
-      {
-        "command": "cypressTestExplorer.openTest",
-        "title": "Open in Cypress",
-        "icon": "$(debug-alt)"
+        "title": "Cypress: Set Executable Command"
       }
     ],
-    "menus": {
-      "view/title": [
-        {
-          "command": "cypressTestExplorer.refresh",
-          "when": "view == cypressTestExplorer",
-          "group": "navigation"
-        },
-        {
-          "command": "cypressTestExplorer.setStartingFolder",
-          "when": "view == cypressTestExplorer",
-          "group": "navigation"
-        },
-        {
-          "command": "cypressTestExplorer.runAllTests",
-          "when": "view == cypressTestExplorer",
-          "group": "navigation"
-        },
-        {
-          "command": "cypressTestExplorer.setProjectPath",
-          "when": "view == cypressTestExplorer",
-          "group": "navigation"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "cypressTestExplorer.runTest",
-          "when": "view == cypressTestExplorer && viewItem == cypressTest",
-          "group": "inline@1"
-        },
-        {
-          "command": "cypressTestExplorer.openTest",
-          "when": "view == cypressTestExplorer && viewItem == cypressTest",
-          "group": "inline@2"
-        }
-      ]
-    },
     "configuration": {
       "title": "Cypress Test Explorer",
       "properties": {
@@ -188,7 +120,7 @@
   "devDependencies": {
     "@types/mocha": "^10.0.7",
     "@types/node": "20.x",
-    "@types/vscode": "^1.60.0",
+    "@types/vscode": "^1.73.0",
     "@typescript-eslint/eslint-plugin": "^7.14.1",
     "@typescript-eslint/parser": "^7.11.0",
     "@vscode/test-cli": "^0.0.9",
