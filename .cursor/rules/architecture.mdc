@@ -8,7 +8,9 @@ alwaysApply: false
 
 - All string literals (command IDs, config keys, view IDs) live in `constants.ts` — never hardcode them
 - Config reads/writes go through `services/configService.ts` — never call `getConfiguration()` directly
-- `CypressRunner` owns test execution; `TestExplorer` owns UI orchestration
+- `CypressTestController` owns test discovery, execution, and UI orchestration via the VS Code Testing API
+- `cypressRunner.ts` provides pure functions (`buildCommand`, `getEnvironmentVariables`) — no state
+- `configParser.ts` reads `specPattern` from cypress config files — used by `testController` for dynamic extension resolution
 - Use `ShellExecution` options for env vars, not string concatenation
 - Webviews must have a CSP with a nonce
 - See `ROADMAP.md` for the full improvement plan

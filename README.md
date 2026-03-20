@@ -1,72 +1,79 @@
 # Cypress Test Explorer for VS Code
 
-A Visual Studio Code extension that helps you discover, navigate and run Cypress tests directly from the editor.
+A Visual Studio Code extension that integrates Cypress tests into the native Test Explorer, giving you a familiar, first-class testing experience.
 
 ## Features
 
-- 🔍 Automatically discovers all the cypress files in your workspace
-- 📁 Displays tests in a tree view organized by directory structure
-- ⚡ Quick access to run individual tests or all tests
-- 🔄 Easy refresh to update the test list
-- ⚙️ Configurable root folder for test discovery
-- 🗂️ Configure project path for locating cypress config file
-- 🔧 Configure cypress run variables tailored to each project
+- Integrates with VS Code's built-in **Testing sidebar** — no custom panels to learn
+- Automatically discovers `.cy.{ts,js,tsx,jsx}` files across your workspace
+- Reads `specPattern` from your `cypress.config` for projects with custom naming conventions
+- **Run** tests headlessly or **Open in Cypress** interactively, directly from Test Explorer
+- Configure browser, paths, and environment variables from a settings panel in the Testing sidebar
+- Separate management of OS-level env vars and Cypress `--env` vars
+
+## Getting Started
+
+1. Install the extension from the [VS Code Marketplace](https://marketplace.visualstudio.com/items?itemName=dpanshug.cypress-test-explorer)
+2. Open a project that contains Cypress test files (`.cy.ts`, `.cy.js`, `.cy.tsx`, or `.cy.jsx`)
+3. Open the **Testing sidebar** (beaker icon in the Activity Bar, or `Ctrl+Shift+T` / `Cmd+Shift+T`)
+4. Your tests appear automatically in the Test Explorer tree
 
 ## Usage
 
-### View Your Tests
+### Running Tests
 
-1. Click the Cypress Test Explorer icon in the Activity Bar
-2. Your Cypress tests will be automatically discovered and displayed in a tree view
+- Click the **play button** next to any test file to run it headlessly (`cypress run`)
+- Click the **debug button** to open it in Cypress interactive mode (`cypress open`)
+- Use **Run All** at the top of the Test Explorer to run everything
 
-### Run Tests
+### Configuration Panel
 
-- Click the play button next to any test to run it
-- When multiple tests are run simultaneously, they are executed in a queue
-- Use the "Run All Tests" button in the title bar to run all tests
+Expand the **Cypress Test Explorer** section in the Testing sidebar to access all settings:
 
-### Configure Root Folder
+| Field | Purpose |
+|---|---|
+| **Tests Directory** | Folder to scan for test files (relative to workspace root) |
+| **Cypress Project** | Directory containing your `cypress.config` file (passed as `--project`) |
+| **Config File** | Only needed if the config file has a non-standard name or location |
+| **Cypress Command** | Command to invoke Cypress (default: `npx cypress`) |
+| **Browser** | Choose Chrome, Firefox, Edge, Electron, or let Cypress decide |
 
-1. Click the folder icon in the Test Explorer title bar
-2. Enter the relative path to your Cypress tests folder
-3. The test tree will automatically refresh with tests from the specified folder
+All fields are optional — the extension works out of the box for standard project structures.
 
-### Configure Project Folder
+Below the configuration section, you can manage:
 
-1. Click the folder icon (Set Cypress Project Path) in the Test Explorer title bar.
-2. Enter the relative path to the folder containing the Cypress configuration file.
+- **Environment Variables** — OS-level variables passed to the Cypress process (e.g., `CY_MOCK=1`)
+- **Cypress Env** — Variables passed via `--env` flag, accessed with `Cypress.env()` in your tests
 
-### Configure Cypress Run Variables
+### Automatic specPattern Detection
 
-1. In the Activity Bar, below the list of Cypress files, locate the section for Cypress Run Variables.
-2. Enter the variables such as `CY_MOCK=1`, to be used for executing the Cypress run.
-3. Click Save to apply the changes.
+If your project uses a custom `specPattern` in `cypress.config.ts` (e.g., `**/*.spec.ts` instead of `**/*.cy.ts`), the extension reads it automatically and adjusts file discovery. When this happens, the config panel shows which patterns are active.
 
-### Configure executable command
+### Command Palette
 
-Set the command to run Cypress tests.
+All settings are also accessible via the Command Palette (`Cmd+Shift+P` / `Ctrl+Shift+P`):
 
-1. Open the Command Palette by pressing Command + Shift + P (Mac) or Ctrl + Shift + P (Windows/Linux).
-2. Type "Set Executable Cypress Command" and select it from the options.
-3. Enter the command to run tests, e.g., npx cypress.
+- `Cypress: Set Root Folder`
+- `Cypress: Set Project Path`
+- `Cypress: Set Executable Command`
+- `Cypress: Update Run Variables`
 
-### Refresh Test List
+## Monorepo / Non-Standard Setups
 
-Click the refresh button in the Test Explorer title bar to update the list of tests.
+For projects where Cypress lives in a subdirectory (e.g., `packages/cypress`), configure:
+
+1. **Tests Directory** — where your `.cy.ts` files are (e.g., `packages/cypress/cypress/tests`)
+2. **Cypress Project** — where `cypress.config.ts` lives (e.g., `packages/cypress`)
 
 ## Requirements
 
-- Visual Studio Code v1.60.0 or higher
+- Visual Studio Code v1.73.0 or higher
 - Node.js and npm installed
 - Cypress installed in your project
 
 ## Development
 
-[VSC Extension quickstart](vsc-extension-quickstart.md) will provide a guide for developers getting started with creating and debugging VS Code extensions. If you're new to VS Code extension development, you can refer to this file for detailed instructions on:
-
-- Setting up your development environment.
-- Running the extension in a development instance of VS Code.
-- Debugging and testing the extension.
+See [VSC Extension quickstart](vsc-extension-quickstart.md) for setting up a development environment, running the extension in debug mode, and testing.
 
 ## Known Issues
 
